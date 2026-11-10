@@ -1,11 +1,1185 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <meta charset="utf-8">
-    <title>我的第一个网站</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>对话</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-page: #F7F6F3;
+      --bg-sidebar: #F1F0EB;
+      --bg-main: #F7F6F3;
+      --bg-surface: #FFFFFF;
+      --border: #E6E4DE;
+      --text: #1C1B18;
+      --text-secondary: #6F6D66;
+      --text-muted: #9A9890;
+      --accent: #2C5F4A;
+      --accent-soft: #E8F0EC;
+      --bubble-user: #EDEBE6;
+      --danger: #B42318;
+      --hover: #E7E5DF;
+      --radius-btn: 10px;
+      --radius-input: 16px;
+      --radius-bubble: 18px;
+      --radius-item: 10px;
+      --radius-panel: 16px;
+      --font: "Noto Sans SC", "Noto Sans CJK SC", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --sidebar-width: 264px;
+      --content-width: 720px;
+      --shadow-soft: 0 1px 2px rgba(28, 27, 24, 0.04), 0 4px 16px rgba(28, 27, 24, 0.04);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg-page);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.65;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    button, textarea, input {
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: inherit;
+      padding: 0;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+    }
+
+    ::selection {
+      background: var(--accent-soft);
+      color: var(--text);
+    }
+
+    :focus { outline: none; }
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* —— 应用壳 —— */
+    .app {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+      position: relative;
+      background: var(--bg-page);
+    }
+
+    /* —— 侧栏 —— */
+    .sidebar {
+      width: var(--sidebar-width);
+      flex: 0 0 var(--sidebar-width);
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      z-index: 40;
+    }
+
+    .sidebar-header {
+      flex: 0 0 auto;
+      padding: 16px 16px 12px;
+    }
+
+    .wordmark {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.4;
+      letter-spacing: 0.01em;
+      padding: 0 4px;
+      margin-bottom: 12px;
+    }
+
+    .btn-new {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      height: 40px;
+      border-radius: var(--radius-btn);
+      background: var(--accent);
+      color: #FFFFFF;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .btn-new:hover { background: #245240; }
+    .btn-new:active { background: #1E4637; }
+    .btn-new svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    .history {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 8px 12px 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .history::-webkit-scrollbar { width: 8px; }
+    .history::-webkit-scrollbar-thumb {
+      background: #DDDBD4;
+      border-radius: 8px;
+      border: 2px solid var(--bg-sidebar);
+    }
+
+    .history-empty {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 8px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .history-label {
+      padding: 12px 10px 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .history-label:first-child { padding-top: 4px; }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 40px;
+      padding: 0 10px 0 12px;
+      border-radius: var(--radius-item);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 400;
+      text-align: left;
+      position: relative;
+      margin-bottom: 2px;
+    }
+
+    .history-item span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .history-item:hover { background: var(--hover); }
+    .history-item.is-active {
+      background: var(--accent-soft);
+      font-weight: 500;
+    }
+    .history-item.is-active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: var(--accent);
+      border-radius: 1px;
+    }
+
+    .sidebar-footer {
+      flex: 0 0 auto;
+      padding: 8px 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn-settings {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      height: 40px;
+      padding: 0 10px;
+      border-radius: var(--radius-item);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .btn-settings:hover { background: var(--hover); }
+    .btn-settings svg {
+      width: 18px;
+      height: 18px;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    body.settings-open .btn-settings {
+      background: var(--accent-soft);
+    }
+
+    .identity {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 44px;
+      padding: 0 10px;
+      margin-top: 4px;
+    }
+
+    .identity-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .identity-name {
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+
+    .identity-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+
+    .sidebar-close {
+      display: none;
+    }
+
+    /* —— 主区 —— */
+    .main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-main);
+      position: relative;
+    }
+
+    .topbar {
+      flex: 0 0 auto;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .topbar-title {
+      flex: 1;
+      min-width: 0;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.4;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    body[data-state="empty"] .topbar-title { color: var(--text-secondary); font-weight: 500; }
+
+    .topbar-btn {
+      display: none;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-btn);
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+
+    .topbar-btn:hover { background: var(--hover); }
+    .topbar-btn svg { width: 20px; height: 20px; }
+
+    /* —— 消息流 —— */
+    .stream {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 8px 24px 12px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stream::-webkit-scrollbar { width: 8px; }
+    .stream::-webkit-scrollbar-thumb {
+      background: #DDDBD4;
+      border-radius: 8px;
+      border: 2px solid var(--bg-main);
+    }
+
+    .stream-inner {
+      max-width: var(--content-width);
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px 0 8px;
+    }
+
+    .stream-inner.thread {
+      margin-top: auto;
+    }
+
+    .empty-state {
+      display: none;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px 32px;
+    }
+
+    .empty-inner {
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .empty-title {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 1.35;
+      letter-spacing: -0.01em;
+    }
+
+    .empty-desc {
+      margin: 12px 0 0;
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 32px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 1;
+      box-shadow: 0 1px 1px rgba(28, 27, 24, 0.03);
+    }
+
+    .chip:hover {
+      background: #F3F2EE;
+      border-color: #DDDBD4;
+    }
+
+    body[data-state="empty"] .empty-state { display: flex; }
+    body[data-state="empty"] .thread { display: none; }
+    body:not([data-state="empty"]) .empty-state { display: none; }
+
+    .thread { padding-top: 8px; }
+
+    .msg {
+      display: flex;
+      margin: 0 0 20px;
+    }
+
+    .msg-user {
+      justify-content: flex-end;
+    }
+
+    .msg-assistant {
+      justify-content: flex-start;
+    }
+
+    .bubble-user {
+      max-width: 85%;
+      background: var(--bubble-user);
+      color: var(--text);
+      border-radius: var(--radius-bubble);
+      padding: 10px 16px;
+      font-size: 15px;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+    }
+
+    .msg-assistant .msg-body {
+      max-width: 100%;
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.65;
+      padding: 2px 4px;
+    }
+
+    .timestamp {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin: 8px 0 20px;
+    }
+
+    /* —— 输入区 —— */
+    .composer {
+      flex: 0 0 auto;
+      padding: 12px 24px 24px;
+    }
+
+    .composer-inner {
+      max-width: var(--content-width);
+      margin: 0 auto;
+    }
+
+    .input-box {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-input);
+      padding: 8px 8px 8px 16px;
+      box-shadow: var(--shadow-soft);
+      min-height: 56px;
+    }
+
+    .input-box:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent), var(--shadow-soft);
+      outline: none;
+    }
+
+    .input-box:focus-within textarea:focus-visible { outline: none; }
+
+    .composer textarea {
+      flex: 1;
+      min-width: 0;
+      border: none;
+      resize: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.55;
+      padding: 8px 0;
+      max-height: 160px;
+      min-height: 24px;
+      field-sizing: content;
+    }
+
+    .composer textarea::placeholder {
+      color: var(--text-muted);
+      opacity: 1;
+    }
+
+    .btn-send {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .btn-send svg { width: 18px; height: 18px; }
+
+    .btn-send:hover:not(:disabled) { background: #245240; }
+
+    .btn-send:disabled {
+      background: #E6E4DE;
+      color: #9A9890;
+    }
+
+    .btn-send:focus-visible { outline-offset: 2px; }
+
+    /* —— 遮罩与设置面板 —— */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(28, 27, 24, 0.18);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 50;
+    }
+
+    body.settings-open .overlay-settings,
+    body.sidebar-open .overlay-sidebar {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .settings-panel {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      bottom: 12px;
+      width: 400px;
+      max-width: calc(100% - 24px);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-panel);
+      box-shadow: 0 2px 4px rgba(28, 27, 24, 0.04), 0 12px 32px rgba(28, 27, 24, 0.08);
+      z-index: 60;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(calc(100% + 24px));
+      transition: transform 0.28s ease;
+      overflow: hidden;
+    }
+
+    body.settings-open .settings-panel { transform: translateX(0); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .settings-panel, .overlay { transition: none; }
+    }
+
+    .settings-header {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      padding: 0 8px 0 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .settings-header h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-btn);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+    }
+
+    .btn-icon:hover { background: var(--hover); color: var(--text); }
+    .btn-icon svg { width: 18px; height: 18px; }
+
+    .settings-body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 8px 20px 28px;
+    }
+
+    .settings-section {
+      padding: 16px 0 8px;
+    }
+
+    .settings-section + .settings-section {
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+      padding-top: 20px;
+    }
+
+    .settings-section h3 {
+      margin: 0 0 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .appearance-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .theme-card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      padding: 14px 14px 12px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: #FBFBFA;
+      text-align: left;
+      min-height: 84px;
+    }
+
+    .theme-card.is-selected {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .theme-card.is-disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      background: #F7F6F3;
+    }
+
+    .theme-swatch {
+      display: flex;
+      width: 100%;
+      height: 40px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      margin-bottom: 2px;
+      overflow: hidden;
+    }
+
+    .mini-side { width: 30%; flex-shrink: 0; }
+    .mini-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      padding: 0 7px;
+    }
+    .mini-bar {
+      display: block;
+      height: 4px;
+      border-radius: 2px;
+      width: 100%;
+    }
+    .mini-bar.short { width: 54%; }
+
+    .theme-swatch.light { background: #F7F6F3; }
+    .theme-swatch.light .mini-side { background: #F1F0EB; border-right: 1px solid #E6E4DE; }
+    .theme-swatch.light .mini-bar { background: #E6E4DE; }
+
+    .theme-swatch.dark {
+      background: #1C1B18;
+      border-color: #3A3935;
+    }
+    .theme-swatch.dark .mini-side { background: #2A2926; border-right: 1px solid #3A3935; }
+    .theme-swatch.dark .mini-bar { background: #4A4944; }
+
+    .theme-name {
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    .theme-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    .theme-card.is-selected .theme-meta { color: var(--accent); }
+
+    .platform-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .platform-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 64px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #FBFBFA;
+    }
+
+    .platform-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .platform-icon.wechat { background: #E8F8EF; color: #07A35A; }
+    .platform-icon.qq {
+      background: #E7F6FC;
+      color: #1296DB;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      line-height: 1;
+    }
+
+    .platform-icon svg { width: 20px; height: 20px; }
+
+    .platform-info { flex: 1; min-width: 0; }
+
+    .platform-name {
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    .platform-status {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.3;
+      margin-top: 2px;
+    }
+
+    .btn-soon {
+      height: 32px;
+      padding: 0 12px;
+      border-radius: var(--radius-btn);
+      background: #EFEDE8;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      flex-shrink: 0;
+      cursor: not-allowed;
+    }
+
+    .about-text {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+
+    /* —— 窄屏 —— */
+    .scrim { display: none; }
+
+    @media (max-width: 800px) {
+      .sidebar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        transform: translateX(-105%);
+        transition: transform 0.28s ease;
+        box-shadow: none;
+      }
+
+      body.sidebar-open .sidebar {
+        transform: translateX(0);
+        box-shadow: 4px 0 24px rgba(28, 27, 24, 0.08);
+        z-index: 55;
+      }
+
+      .topbar { padding: 0 12px; }
+      .topbar-btn { display: flex; }
+
+      .stream { padding: 8px 16px 12px; }
+      .composer { padding: 8px 16px 20px; }
+
+      .empty-title { font-size: 24px; }
+      .suggestions { margin-top: 24px; }
+
+      .sidebar-header { position: relative; }
+      .sidebar-close {
+        display: flex;
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-btn);
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+      }
+      .sidebar-close:hover { background: var(--hover); }
+      .sidebar-close svg { width: 18px; height: 18px; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .sidebar { transition: none; }
+      }
+    }
+
+    @media (max-width: 480px) {
+      .chip { font-size: 13px; }
+      .empty-inner { max-width: 100%; }
+      .bubble-user { max-width: 90%; }
+    }
+  </style>
 </head>
-<body style="text-align:center; padding-top: 50px; background-color: #f4f4f4;">
-    <h1>恭喜你！你的网站已经成功部署上线！</h1>
-    <p>正在准备申请 QQ 互联...</p>
+<body data-state="empty">
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="历史会话">
+      <button type="button" class="sidebar-close" data-close-sidebar aria-label="关闭侧栏">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18"/>
+        </svg>
+      </button>
+      <div class="sidebar-header">
+        <div class="wordmark">对话</div>
+        <button type="button" class="btn-new" data-new-chat>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          新对话
+        </button>
+      </div>
+
+      <nav class="history" aria-label="会话列表">
+        <div class="history-empty">还没有会话</div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button type="button" class="btn-settings" data-toggle-settings>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+          </svg>
+          设置
+        </button>
+        <div class="identity" aria-label="当前使用者">
+          <div class="identity-avatar">我</div>
+          <div>
+            <div class="identity-name">我</div>
+            <div class="identity-meta">仅本机使用</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <button type="button" class="topbar-btn" data-open-sidebar aria-label="历史会话">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M5 6h14M5 12h14M5 18h10"/>
+          </svg>
+        </button>
+        <div class="topbar-title" id="sessionTitle">新对话</div>
+        <button type="button" class="topbar-btn" data-new-chat aria-label="新对话">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+        </button>
+      </header>
+
+      <div class="stream" id="stream">
+        <div class="empty-state">
+          <div class="empty-inner">
+            <h1 class="empty-title">有什么想聊的？</h1>
+            <p class="empty-desc">这是你的个人对话页，记录只留在本机。</p>
+            <div class="suggestions">
+              <button type="button" class="chip" data-suggest="帮我理清今天的待办">帮我理清今天的待办</button>
+              <button type="button" class="chip" data-suggest="写一段简短回复">写一段简短回复</button>
+              <button type="button" class="chip" data-suggest="解释这段代码">解释这段代码</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="stream-inner thread" id="thread"></div>
+      </div>
+
+      <div class="composer">
+        <div class="composer-inner">
+          <form class="input-box" id="composerForm">
+            <textarea id="composerInput" rows="1" placeholder="输入消息…" aria-label="输入消息"></textarea>
+            <button type="submit" class="btn-send" id="sendBtn" disabled aria-label="发送">
+              <svg class="icon-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 19V6M6.5 11.5L12 6l5.5 5.5"/>
+              </svg>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay overlay-sidebar" data-close-sidebar hidden></div>
+    <div class="overlay overlay-settings" data-close-settings></div>
+
+    <aside class="settings-panel" id="settingsPanel" aria-label="设置" aria-hidden="true" inert>
+      <div class="settings-header">
+        <h2>设置</h2>
+        <button type="button" class="btn-icon" data-close-settings aria-label="关闭设置">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="settings-body">
+        <section class="settings-section">
+          <h3>外观</h3>
+          <div class="appearance-grid">
+            <div class="theme-card is-selected" aria-current="true">
+              <div class="theme-swatch light" aria-hidden="true">
+                <span class="mini-side"></span>
+                <span class="mini-main"><span class="mini-bar"></span><span class="mini-bar short"></span></span>
+              </div>
+              <div class="theme-name">浅色</div>
+              <div class="theme-meta">当前使用</div>
+            </div>
+            <div class="theme-card is-disabled" aria-disabled="true">
+              <div class="theme-swatch dark" aria-hidden="true">
+                <span class="mini-side"></span>
+                <span class="mini-main"><span class="mini-bar"></span><span class="mini-bar short"></span></span>
+              </div>
+              <div class="theme-name">深色</div>
+              <div class="theme-meta">即将开放</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="settings-section">
+          <h3>平台接入</h3>
+          <div class="platform-list">
+            <div class="platform-row">
+              <div class="platform-icon qq" aria-hidden="true"><span>QQ</span></div>
+              <div class="platform-info">
+                <div class="platform-name">QQ</div>
+                <div class="platform-status">未接入</div>
+              </div>
+              <button type="button" class="btn-soon" disabled>即将开放</button>
+            </div>
+            <div class="platform-row">
+              <div class="platform-icon wechat" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9.4 4.2c-4.2 0-7.6 2.9-7.6 6.5 0 2.1 1.2 4 3.1 5.2l-.8 2.4 2.6-1.4c.8.2 1.6.4 2.4.4.2 0 .5 0 .7 0-.3-.6-.5-1.3-.5-2 0-3.4 3.2-6.1 7.2-6.1.2 0 .4 0 .6 0-1-3-4-5-7.7-5zm-2.2 5.1a.9.9 0 1 1 0-1.8.9.9 0 0 1 0 1.8zm4.4 0a.9.9 0 1 1 0-1.8.9.9 0 0 1 0 1.8z"/>
+                  <path d="M20.2 17.2c1.5-.9 2.4-2.4 2.4-4 0-2.8-2.8-5.1-6.2-5.1s-6.2 2.3-6.2 5.1 2.8 5.1 6.2 5.1c.6 0 1.3-.1 1.9-.3l2.1 1.1-.6-1.9zm-6.5-4.5a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5zm3.6 0a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5z"/>
+                </svg>
+              </div>
+              <div class="platform-info">
+                <div class="platform-name">微信</div>
+                <div class="platform-status">未接入</div>
+              </div>
+              <button type="button" class="btn-soon" disabled>即将开放</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="settings-section">
+          <h3>关于</h3>
+          <p class="about-text">这是你的个人对话首页，仅供自己使用，记录留在本机。</p>
+        </section>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    (function () {
+      const body = document.body;
+      const input = document.getElementById("composerInput");
+      const sendBtn = document.getElementById("sendBtn");
+      const form = document.getElementById("composerForm");
+      const stream = document.getElementById("stream");
+      const thread = document.getElementById("thread");
+      const titleEl = document.getElementById("sessionTitle");
+      const settingsPanel = document.getElementById("settingsPanel");
+      const sidebar = document.getElementById("sidebar");
+      const narrowQuery = window.matchMedia("(max-width: 800px)");
+      let settingsReturn = null;
+      let sidebarReturn = null;
+
+      function autoResize() {
+        input.style.height = "auto";
+        input.style.height = Math.min(input.scrollHeight, 160) + "px";
+      }
+
+      function updateSendEnabled() {
+        const hasText = input.value.trim().length > 0;
+        sendBtn.disabled = !hasText;
+        sendBtn.setAttribute("aria-label", "发送");
+      }
+
+      function scrollToBottom() {
+        requestAnimationFrame(() => {
+          stream.scrollTop = stream.scrollHeight;
+        });
+      }
+
+      function titleFrom(text) {
+        const line = text.split("\n")[0].replace(/\s+/g, " ").trim();
+        return line || "新对话";
+      }
+
+      function syncSidebarInert() {
+        const hideDrawer = narrowQuery.matches && !body.classList.contains("sidebar-open");
+        if (hideDrawer) sidebar.setAttribute("inert", "");
+        else sidebar.removeAttribute("inert");
+      }
+
+      function setSidebarOpen(open, restoreFocus) {
+        body.classList.toggle("sidebar-open", open);
+        const ov = document.querySelector(".overlay-sidebar");
+        if (ov) ov.hidden = !open;
+        syncSidebarInert();
+        if (open) {
+          const closeBtn = sidebar.querySelector("[data-close-sidebar]");
+          if (closeBtn) closeBtn.focus();
+        } else if (restoreFocus && sidebarReturn) {
+          sidebarReturn.focus();
+          sidebarReturn = null;
+        } else {
+          sidebarReturn = null;
+        }
+      }
+
+      function setSettingsOpen(open) {
+        body.classList.toggle("settings-open", open);
+        settingsPanel.setAttribute("aria-hidden", open ? "false" : "true");
+        if (open) {
+          settingsPanel.removeAttribute("inert");
+          const closeBtn = settingsPanel.querySelector("[data-close-settings]");
+          if (closeBtn) closeBtn.focus();
+        } else {
+          settingsPanel.setAttribute("inert", "");
+          if (settingsReturn) {
+            settingsReturn.focus();
+            settingsReturn = null;
+          }
+        }
+      }
+
+      function resetChat() {
+        input.value = "";
+        autoResize();
+        thread.replaceChildren();
+        body.setAttribute("data-state", "empty");
+        titleEl.textContent = "新对话";
+        updateSendEnabled();
+        setSettingsOpen(false);
+        setSidebarOpen(false);
+        input.focus();
+      }
+
+      function appendUserMessage(text) {
+        const msg = document.createElement("div");
+        msg.className = "msg msg-user";
+        const bubble = document.createElement("div");
+        bubble.className = "bubble-user";
+        bubble.textContent = text;
+        msg.appendChild(bubble);
+        thread.appendChild(msg);
+      }
+
+      input.addEventListener("input", () => {
+        autoResize();
+        updateSendEnabled();
+      });
+
+      input.addEventListener("keydown", (e) => {
+        if (e.isComposing || e.keyCode === 229) return;
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          if (sendBtn.disabled) return;
+          form.requestSubmit();
+        }
+      });
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+        const wasEmpty = body.getAttribute("data-state") === "empty";
+        input.value = "";
+        autoResize();
+        updateSendEnabled();
+        if (wasEmpty) {
+          titleEl.textContent = titleFrom(text);
+          body.setAttribute("data-state", "active");
+        }
+        appendUserMessage(text);
+        setSidebarOpen(false);
+        input.focus();
+        scrollToBottom();
+      });
+
+      document.querySelectorAll("[data-new-chat]").forEach((btn) => {
+        btn.addEventListener("click", resetChat);
+      });
+
+      document.querySelectorAll("[data-suggest]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          input.value = btn.getAttribute("data-suggest") || "";
+          autoResize();
+          updateSendEnabled();
+          input.focus();
+        });
+      });
+
+      document.querySelectorAll("[data-toggle-settings]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const open = !body.classList.contains("settings-open");
+          if (open) {
+            settingsReturn = narrowQuery.matches && sidebarReturn ? sidebarReturn : btn;
+          }
+          setSidebarOpen(false);
+          setSettingsOpen(open);
+        });
+      });
+
+      document.querySelectorAll("[data-close-settings]").forEach((el) => {
+        el.addEventListener("click", () => setSettingsOpen(false));
+      });
+
+      document.querySelectorAll("[data-open-sidebar]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          sidebarReturn = btn;
+          setSettingsOpen(false);
+          setSidebarOpen(true);
+        });
+      });
+
+      document.querySelectorAll("[data-close-sidebar]").forEach((el) => {
+        el.addEventListener("click", () => setSidebarOpen(false, true));
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape") return;
+        if (body.classList.contains("settings-open")) setSettingsOpen(false);
+        else if (body.classList.contains("sidebar-open")) setSidebarOpen(false, true);
+      });
+
+      narrowQuery.addEventListener("change", () => {
+        if (!narrowQuery.matches) setSidebarOpen(false);
+        else syncSidebarInert();
+      });
+      syncSidebarInert();
+      autoResize();
+      updateSendEnabled();
+    })();
+  </script>
 </body>
 </html>
